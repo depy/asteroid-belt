@@ -1,0 +1,7 @@
+-lib heaps
+-cp src
+-js game.js
+-main Main
+-D windowSize=800x600
+-dce full
+-D release
