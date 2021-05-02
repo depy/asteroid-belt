@@ -301,7 +301,6 @@ Player.__name__ = "Player";
 Player.prototype = {
 	update: function(dt) {
 		this.timer += dt;
-		this.decreaseSpeed();
 		this.move();
 		this.handleInput();
 	}
@@ -316,29 +315,17 @@ Player.prototype = {
 		if(left) {
 			var _g = this.obj;
 			_g.posChanged = true;
-			_g.rotation += -Math.PI / 48;
+			_g.rotation += -Player.ROTATION_SPEED;
 		} else if(right) {
 			var _g = this.obj;
 			_g.posChanged = true;
-			_g.rotation += Math.PI / 48;
+			_g.rotation += Player.ROTATION_SPEED;
 		}
 		if(up) {
 			this.drawFire();
-			this.increaseSpeed();
+			this.speed = 0.1;
 		} else {
 			this.removeFire();
-			this.speed = 0;
-		}
-	}
-	,increaseSpeed: function() {
-		this.speed += Player.SPEED_INCREMENT;
-		if(this.speed >= Player.MAX_SPEED) {
-			this.speed = Player.MAX_SPEED;
-		}
-	}
-	,decreaseSpeed: function() {
-		this.speed -= Player.SPEED_DECREMENT;
-		if(this.speed <= 0) {
 			this.speed = 0;
 		}
 	}
@@ -382,43 +369,7 @@ Player.prototype = {
 		this.fire.alpha = 0;
 	}
 	,move: function() {
-		var xd = Math.cos(this.obj.rotation);
-		var yd = Math.sin(this.obj.rotation);
-		var x = xd * this.speed;
-		var y = yd * this.speed;
-		var z = 0;
-		if(z == null) {
-			z = 0.;
-		}
-		if(y == null) {
-			y = 0.;
-		}
-		if(x == null) {
-			x = 0.;
-		}
-		var vec_x = x;
-		var vec_y = y;
-		var vec_z = z;
-		var vec_w = 1.;
-		var _this = this.dir;
-		this.dir = new h3d_Vector(_this.x + vec_x,_this.y + vec_y,_this.z + vec_z,_this.w + vec_w);
-		var _this = this.dir;
-		if(Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z) > 5) {
-			var _this = this.dir;
-			var k = _this.x * _this.x + _this.y * _this.y + _this.z * _this.z;
-			if(k < 1e-10) {
-				k = 0;
-			} else {
-				k = 1. / Math.sqrt(k);
-			}
-			_this.x *= k;
-			_this.y *= k;
-			_this.z *= k;
-			var _this = this.dir;
-			_this.x *= 5;
-			_this.y *= 5;
-			_this.z *= 5;
-		}
+		this.dir = this.calculateDirection();
 		var _this = this.obj;
 		_this.posChanged = true;
 		_this.x = this.obj.x + this.dir.x;
@@ -445,8 +396,46 @@ Player.prototype = {
 			_this.y = -16;
 		}
 	}
+	,calculateDirection: function() {
+		var xd = Math.cos(this.obj.rotation);
+		var yd = Math.sin(this.obj.rotation);
+		var x = xd * this.speed;
+		var y = yd * this.speed;
+		var z = 0;
+		if(z == null) {
+			z = 0.;
+		}
+		if(y == null) {
+			y = 0.;
+		}
+		if(x == null) {
+			x = 0.;
+		}
+		var vec_x = x;
+		var vec_y = y;
+		var vec_z = z;
+		var vec_w = 1.;
+		var _this = this.dir;
+		var dir = new h3d_Vector(_this.x + vec_x,_this.y + vec_y,_this.z + vec_z,_this.w + vec_w);
+		if(Math.sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z) > Player.MAX_SPEED) {
+			var k = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
+			if(k < 1e-10) {
+				k = 0;
+			} else {
+				k = 1. / Math.sqrt(k);
+			}
+			dir.x *= k;
+			dir.y *= k;
+			dir.z *= k;
+			var f = Player.MAX_SPEED;
+			dir.x *= f;
+			dir.y *= f;
+			dir.z *= f;
+		}
+		return dir;
+	}
 	,shoot: function() {
-		if(this.timer > 0.5) {
+		if(this.timer > 0.3) {
 			this.timer = 0;
 			var xd = Math.cos(this.obj.rotation);
 			var yd = Math.sin(this.obj.rotation);
@@ -28513,9 +28502,8 @@ Array.__name__ = "Array";
 haxe_ds_ObjectMap.count = 0;
 haxe_MainLoop.add(hxd_System.updateCursor,-1);
 js_Boot.__toStr = ({ }).toString;
-Player.MAX_SPEED = 0.1;
-Player.SPEED_INCREMENT = 0.02;
-Player.SPEED_DECREMENT = 0.01;
+Player.MAX_SPEED = 5;
+Player.ROTATION_SPEED = Math.PI / 32;
 h3d_Buffer.GUID = 0;
 h3d_Engine.SOFTWARE_DRIVER = false;
 h3d_Engine.ANTIALIASING = 0;

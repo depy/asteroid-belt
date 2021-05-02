@@ -6,9 +6,11 @@ import hxd.BitmapData;
 import hxd.Key in K;
 
 class Player {
-    static final MAX_SPEED = 0.1;
-    static final SPEED_INCREMENT = 0.02;
-    static final SPEED_DECREMENT = 0.01;
+    static final MAX_SPEED = 5;
+    static final MAX_ACCEL = 0.1;
+    static final SPEED_INCREMENT = 0.04;
+    static final SPEED_DECREMENT = 0.04;
+    static final ROTATION_SPEED = Math.PI/32;
     static final DEBUG = true;
 
     var elapsedTime: Float;
@@ -36,7 +38,6 @@ class Player {
     public function update(dt :Float) {
         timer += dt;
 
-        decreaseSpeed();
         move();
         handleInput();
     }
@@ -57,26 +58,16 @@ class Player {
 
         if (spc) shoot();
 
-        if (left) this.obj.rotate(-Math.PI/48);
-        else if (right) this.obj.rotate(Math.PI/48);
+        if (left) this.obj.rotate(-ROTATION_SPEED);
+        else if (right) this.obj.rotate(ROTATION_SPEED);
 
         if (up) {
             drawFire();
-            increaseSpeed();
+            this.speed = 0.1;
         } else {
             removeFire();
             this.speed = 0;
         }
-    }
-
-    function increaseSpeed() {
-        this.speed += SPEED_INCREMENT;
-        if (this.speed >= MAX_SPEED) this.speed = MAX_SPEED;
-    }
-
-    function decreaseSpeed() {
-        this.speed -= SPEED_DECREMENT;
-        if (this.speed <= 0) this.speed = 0;
     }
 
     function draw(parentObject, x: Int, y: Int) {
@@ -109,16 +100,7 @@ class Player {
     }
 
     function move() {
-        var xd = Math.cos(this.obj.rotation);
-        var yd = Math.sin(this.obj.rotation);
-        var vec = new Vector(xd * speed, yd * speed, 0);
-        this.dir = dir.add(vec);
-
-        if (this.dir.length() > 5) {
-            this.dir.normalize();
-            this.dir.scale(5);
-        }
-
+        this.dir = calculateDirection();
         this.obj.setPosition(this.obj.x + this.dir.x, this.obj.y + this.dir.y);
 
         if (this.obj.x < -16) this.obj.x = 816;
@@ -126,6 +108,19 @@ class Player {
         
         if (this.obj.x > 816) this.obj.x = -16;
         if (this.obj.y > 616) this.obj.y = -16;
+    }
+
+    function calculateDirection() {
+        var xd = Math.cos(this.obj.rotation);
+        var yd = Math.sin(this.obj.rotation);
+        var vec = new Vector(xd * speed, yd * speed, 0);
+        var dir = this.dir.add(vec);
+
+        if (dir.length() > MAX_SPEED) {
+            dir.normalize();
+            dir.scale(MAX_SPEED);
+        }
+        return dir;
     }
 
     function shoot() {
