@@ -31,8 +31,7 @@ class Game extends hxd.App {
 
         if (timer > 1) {
             timer = 0;
-            trace("Bullets: ", bullets.length);
-            trace("s2d children: ", s2d.numChildren);
+            trace('Bullets: ${bullets.length} :: Scene children ${s2d.numChildren}');
         }
 
         p.update(dt);

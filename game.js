@@ -217,8 +217,7 @@ Game.prototype = $extend(hxd_App.prototype,{
 		this.timer += dt;
 		if(this.timer > 1) {
 			this.timer = 0;
-			haxe_Log.trace("Bullets: ",{ fileName : "src/Game.hx", lineNumber : 34, className : "Game", methodName : "update", customParams : [this.bullets.length]});
-			haxe_Log.trace("s2d children: ",{ fileName : "src/Game.hx", lineNumber : 35, className : "Game", methodName : "update", customParams : [this.s2d.children.length]});
+			haxe_Log.trace("Bullets: " + this.bullets.length + " :: Scene children " + this.s2d.children.length,{ fileName : "src/Game.hx", lineNumber : 34, className : "Game", methodName : "update"});
 		}
 		this.p.update(dt);
 		var _g = 0;
@@ -435,7 +434,7 @@ Player.prototype = {
 		return dir;
 	}
 	,shoot: function() {
-		if(this.timer > 0.3) {
+		if(this.timer > 0.5) {
 			this.timer = 0;
 			var xd = Math.cos(this.obj.rotation);
 			var yd = Math.sin(this.obj.rotation);
