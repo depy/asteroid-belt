@@ -57,8 +57,8 @@ class Player {
 
         if (spc) shoot();
 
-        if (left) this.obj.rotate(-Math.PI/32);
-        else if (right) this.obj.rotate(Math.PI/32);
+        if (left) this.obj.rotate(-Math.PI/48);
+        else if (right) this.obj.rotate(Math.PI/48);
 
         if (up) {
             drawFire();
@@ -113,13 +113,19 @@ class Player {
         var yd = Math.sin(this.obj.rotation);
         var vec = new Vector(xd * speed, yd * speed, 0);
         this.dir = dir.add(vec);
+
+        if (this.dir.length() > 5) {
+            this.dir.normalize();
+            this.dir.scale(5);
+        }
+
         this.obj.setPosition(this.obj.x + this.dir.x, this.obj.y + this.dir.y);
 
-        if (this.obj.x < -32) this.obj.x = 832;
-        if (this.obj.y < -32) this.obj.y = 632;
+        if (this.obj.x < -16) this.obj.x = 816;
+        if (this.obj.y < -16) this.obj.y = 616;
         
-        if (this.obj.x > 832) this.obj.x = -32;
-        if (this.obj.y > 632) this.obj.y = -32;
+        if (this.obj.x > 816) this.obj.x = -16;
+        if (this.obj.y > 616) this.obj.y = -16;
     }
 
     function shoot() {

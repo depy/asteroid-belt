@@ -59,25 +59,25 @@ Bullet.prototype = {
 			_this.x = this.bmp.x + this.dir.x;
 			_this.posChanged = true;
 			_this.y = this.bmp.y + this.dir.y;
-			if(this.bmp.x < -32) {
+			if(this.bmp.x < -4) {
 				var _this = this.bmp;
 				_this.posChanged = true;
-				_this.x = 832;
+				_this.x = 804;
 			}
-			if(this.bmp.y < -32) {
+			if(this.bmp.y < -4) {
 				var _this = this.bmp;
 				_this.posChanged = true;
-				_this.y = 632;
+				_this.y = 604;
 			}
-			if(this.bmp.x > 832) {
+			if(this.bmp.x > 804) {
 				var _this = this.bmp;
 				_this.posChanged = true;
-				_this.x = -32;
+				_this.x = -4;
 			}
-			if(this.bmp.y > 632) {
+			if(this.bmp.y > 604) {
 				var _this = this.bmp;
 				_this.posChanged = true;
-				_this.y = -32;
+				_this.y = -4;
 			}
 		}
 	}
@@ -316,11 +316,11 @@ Player.prototype = {
 		if(left) {
 			var _g = this.obj;
 			_g.posChanged = true;
-			_g.rotation += -Math.PI / 32;
+			_g.rotation += -Math.PI / 48;
 		} else if(right) {
 			var _g = this.obj;
 			_g.posChanged = true;
-			_g.rotation += Math.PI / 32;
+			_g.rotation += Math.PI / 48;
 		}
 		if(up) {
 			this.drawFire();
@@ -402,30 +402,47 @@ Player.prototype = {
 		var vec_w = 1.;
 		var _this = this.dir;
 		this.dir = new h3d_Vector(_this.x + vec_x,_this.y + vec_y,_this.z + vec_z,_this.w + vec_w);
+		var _this = this.dir;
+		if(Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z) > 5) {
+			var _this = this.dir;
+			var k = _this.x * _this.x + _this.y * _this.y + _this.z * _this.z;
+			if(k < 1e-10) {
+				k = 0;
+			} else {
+				k = 1. / Math.sqrt(k);
+			}
+			_this.x *= k;
+			_this.y *= k;
+			_this.z *= k;
+			var _this = this.dir;
+			_this.x *= 5;
+			_this.y *= 5;
+			_this.z *= 5;
+		}
 		var _this = this.obj;
 		_this.posChanged = true;
 		_this.x = this.obj.x + this.dir.x;
 		_this.posChanged = true;
 		_this.y = this.obj.y + this.dir.y;
-		if(this.obj.x < -32) {
+		if(this.obj.x < -16) {
 			var _this = this.obj;
 			_this.posChanged = true;
-			_this.x = 832;
+			_this.x = 816;
 		}
-		if(this.obj.y < -32) {
+		if(this.obj.y < -16) {
 			var _this = this.obj;
 			_this.posChanged = true;
-			_this.y = 632;
+			_this.y = 616;
 		}
-		if(this.obj.x > 832) {
+		if(this.obj.x > 816) {
 			var _this = this.obj;
 			_this.posChanged = true;
-			_this.x = -32;
+			_this.x = -16;
 		}
-		if(this.obj.y > 632) {
+		if(this.obj.y > 616) {
 			var _this = this.obj;
 			_this.posChanged = true;
-			_this.y = -32;
+			_this.y = -16;
 		}
 	}
 	,shoot: function() {

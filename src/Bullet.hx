@@ -42,11 +42,11 @@ class Bullet {
         } else {
             this.bmp.setPosition(this.bmp.x + dir.x, this.bmp.y + dir.y);
 
-            if (this.bmp.x < -32) this.bmp.x = 832;
-            if (this.bmp.y < -32) this.bmp.y = 632;
+            if (this.bmp.x < -4) this.bmp.x = 804;
+            if (this.bmp.y < -4) this.bmp.y = 604;
             
-            if (this.bmp.x > 832) this.bmp.x = -32;
-            if (this.bmp.y > 632) this.bmp.y = -32;
+            if (this.bmp.x > 804) this.bmp.x = -4;
+            if (this.bmp.y > 604) this.bmp.y = -4;
         }
     }
 }
