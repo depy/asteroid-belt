@@ -13,6 +13,7 @@ class Player {
 
     var elapsedTime: Float;
 
+    var parentObj: Object;
     var obj: Object;
     var ship: Bitmap;
     var fire: Bitmap;
@@ -20,15 +21,21 @@ class Player {
     var speed: Float;
     var mspeed: Float;
     var dir = new Vector(0, 0, 0);
+    var timer = 0.0;
 
     public function new(parentObject: h2d.Object, x: Int, y: Int) {
         this.speed = 0;
+
+        this.parentObj = parentObject;
         this.obj = new Object(parentObject);
-        draw(this.obj, x, y);
         this.obj.setPosition(x, y);
+        
+        draw(this.obj, x, y);
     }
 
     public function update(dt :Float) {
+        timer += dt;
+
         decreaseSpeed();
         move();
         handleInput();
@@ -47,6 +54,8 @@ class Player {
 		var right = K.isDown(K.RIGHT);
 		var up = K.isDown(K.UP);
         var spc = K.isDown(K.SPACE);
+
+        if (spc) shoot();
 
         if (left) this.obj.rotate(-Math.PI/32);
         else if (right) this.obj.rotate(Math.PI/32);
@@ -111,5 +120,16 @@ class Player {
         
         if (this.obj.x > 832) this.obj.x = -32;
         if (this.obj.y > 632) this.obj.y = -32;
+    }
+
+    function shoot() {
+        if (timer > 0.5) {
+            timer = 0;
+            var xd = Math.cos(this.obj.rotation);
+            var yd = Math.sin(this.obj.rotation);
+            var vec = new Vector(xd, yd, 0);
+            var b = new Bullet(this.obj.parent, this.obj.x + 6*xd, this.obj.y + 6*yd, vec);
+            Game.getInstance().addBullet(b);
+        }
     }
 }

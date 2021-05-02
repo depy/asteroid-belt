@@ -7,6 +7,82 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var Bullet = function(parentObject,x,y,dir) {
+	this.timer = 0.0;
+	this.dead = false;
+	dir.x *= 3;
+	dir.y *= 3;
+	dir.z *= 3;
+	this.dir = dir;
+	this.parentObject = parentObject;
+	this.draw(x,y);
+};
+Bullet.__name__ = "Bullet";
+Bullet.prototype = {
+	draw: function(x,y) {
+		var bmpData = new hxd_BitmapData(4,4);
+		bmpData.line(0,0,3,0,-16711681);
+		bmpData.line(0,0,0,3,-16711681);
+		bmpData.line(3,3,0,3,-16711681);
+		bmpData.line(3,3,3,0,-16711681);
+		this.tile = h2d_Tile.fromBitmap(bmpData);
+		var _this = this.tile;
+		var px = 0.5;
+		var py = 0.5;
+		if(py == null) {
+			py = 0.5;
+		}
+		if(px == null) {
+			px = 0.5;
+		}
+		_this.dx = -(px * _this.width);
+		_this.dy = -(py * _this.height);
+		this.bmp = new h2d_Bitmap(this.tile,this.parentObject);
+		var _this = this.bmp;
+		_this.posChanged = true;
+		_this.x = x;
+		_this.posChanged = true;
+		_this.y = y;
+	}
+	,update: function(dt) {
+		this.timer += dt;
+		if(this.timer > 2) {
+			this.bmp.alpha -= 4 * dt;
+		}
+		if(this.timer > 3) {
+			this.dead = true;
+			this.tile.dispose();
+			this.parentObject.removeChild(this.bmp);
+		} else {
+			var _this = this.bmp;
+			_this.posChanged = true;
+			_this.x = this.bmp.x + this.dir.x;
+			_this.posChanged = true;
+			_this.y = this.bmp.y + this.dir.y;
+			if(this.bmp.x < -32) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.x = 832;
+			}
+			if(this.bmp.y < -32) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.y = 632;
+			}
+			if(this.bmp.x > 832) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.x = -32;
+			}
+			if(this.bmp.y > 632) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.y = -32;
+			}
+		}
+	}
+	,__class__: Bullet
+};
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
 };
@@ -111,12 +187,23 @@ hxd_App.prototype = {
 	,__class__: hxd_App
 };
 var Game = function() {
+	this.timer = 0.0;
+	this.bullets = [];
 	hxd_App.call(this);
 };
 Game.__name__ = "Game";
+Game.getInstance = function() {
+	if(Game.instance == null) {
+		Game.instance = new Game();
+	}
+	return Game.instance;
+};
 Game.__super__ = hxd_App;
 Game.prototype = $extend(hxd_App.prototype,{
-	init: function() {
+	addBullet: function(bullet) {
+		this.bullets.push(bullet);
+	}
+	,init: function() {
 		var _this = this.s2d;
 		var _g = _this;
 		_g.posChanged = true;
@@ -127,7 +214,24 @@ Game.prototype = $extend(hxd_App.prototype,{
 		this.p = new Player(this.s2d,100,100);
 	}
 	,update: function(dt) {
+		this.timer += dt;
+		if(this.timer > 1) {
+			this.timer = 0;
+			haxe_Log.trace("Bullets: ",{ fileName : "src/Game.hx", lineNumber : 34, className : "Game", methodName : "update", customParams : [this.bullets.length]});
+			haxe_Log.trace("s2d children: ",{ fileName : "src/Game.hx", lineNumber : 35, className : "Game", methodName : "update", customParams : [this.s2d.children.length]});
+		}
 		this.p.update(dt);
+		var _g = 0;
+		var _g1 = this.bullets;
+		while(_g < _g1.length) {
+			var b = _g1[_g];
+			++_g;
+			if(b.dead) {
+				HxOverrides.remove(this.bullets,b);
+			} else {
+				b.update(dt);
+			}
+		}
 	}
 	,__class__: Game
 });
@@ -177,23 +281,26 @@ Lambda.array = function(it) {
 var Main = function() { };
 Main.__name__ = "Main";
 Main.main = function() {
-	var g = new Game();
+	Game.getInstance();
 };
 Math.__name__ = "Math";
 var Player = function(parentObject,x,y) {
+	this.timer = 0.0;
 	this.dir = new h3d_Vector(0,0,0);
 	this.speed = 0;
+	this.parentObj = parentObject;
 	this.obj = new h2d_Object(parentObject);
-	this.draw(this.obj,x,y);
 	var _this = this.obj;
 	_this.posChanged = true;
 	_this.x = x;
 	_this.posChanged = true;
 	_this.y = y;
+	this.draw(this.obj,x,y);
 };
 Player.__name__ = "Player";
 Player.prototype = {
 	update: function(dt) {
+		this.timer += dt;
 		this.decreaseSpeed();
 		this.move();
 		this.handleInput();
@@ -203,6 +310,9 @@ Player.prototype = {
 		var right = hxd_Key.isDown(39);
 		var up = hxd_Key.isDown(38);
 		var spc = hxd_Key.isDown(32);
+		if(spc) {
+			this.shoot();
+		}
 		if(left) {
 			var _g = this.obj;
 			_g.posChanged = true;
@@ -316,6 +426,16 @@ Player.prototype = {
 			var _this = this.obj;
 			_this.posChanged = true;
 			_this.y = -32;
+		}
+	}
+	,shoot: function() {
+		if(this.timer > 0.5) {
+			this.timer = 0;
+			var xd = Math.cos(this.obj.rotation);
+			var yd = Math.sin(this.obj.rotation);
+			var vec = new h3d_Vector(xd,yd,0);
+			var b = new Bullet(this.obj.parent,this.obj.x + 6 * xd,this.obj.y + 6 * yd,vec);
+			Game.getInstance().addBullet(b);
 		}
 	}
 	,__class__: Player
@@ -3742,6 +3862,12 @@ h2d_Tile.prototype = {
 			this.u2 = (this.x + this.width) / tex.width;
 			this.v2 = (this.y + this.height) / tex.height;
 		}
+	}
+	,dispose: function() {
+		if(this.innerTex != null) {
+			this.innerTex.dispose();
+		}
+		this.innerTex = null;
 	}
 	,__class__: h2d_Tile
 };
