@@ -34,7 +34,7 @@ class Player {
     }
 
     public function getPosition() {
-        return {x: this.bmp.x, y: this.bmp.y};
+        return {x: this.obj.x, y: this.obj.y};
     }
 
     public function handleInput() {
@@ -66,12 +66,12 @@ class Player {
         bmpData.line(0,0, 0,15, 0xFFFFFFFF);
 
         var tile = Tile.fromBitmap(bmpData);
-        tile.setCenterRatio(0.5, 0.6);
+        tile.setCenterRatio(0.5, 0.5);
         this.bmp = new Bitmap(tile, parentObject);
         parentObject.setPosition(x, y);
     }
 
     function move() {
-        this.obj.move(this.speed, this.speed);
+        this.obj.move(speed, speed);
     }
 }

@@ -234,7 +234,7 @@ Player.prototype = {
 		bmpData.line(0,0,0,15,-1);
 		var tile = h2d_Tile.fromBitmap(bmpData);
 		var px = 0.5;
-		var py = 0.6;
+		var py = 0.5;
 		if(py == null) {
 			py = 0.5;
 		}
