@@ -3,10 +3,10 @@ class Game extends hxd.App {
 
     override function init() {
         s2d.scale(2);
-        p = new Player(s2d, 50, 50);
+        p = new Player(s2d, 100, 100);
     }
 
     override function update(dt: Float) {
-        p.update();
+        p.update(dt);
     }
 }
