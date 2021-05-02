@@ -1,3 +1,4 @@
+import h3d.Vector;
 import h2d.Tile;
 import h2d.Bitmap;
 import h2d.Object;
@@ -5,16 +6,20 @@ import hxd.BitmapData;
 import hxd.Key in K;
 
 class Player {
-    static final MAX_SPEED = 4;
-    static final SPEED_INCREMENT = 0.1;
+    static final MAX_SPEED = 0.1;
+    static final SPEED_INCREMENT = 0.02;
     static final SPEED_DECREMENT = 0.01;
     static final DEBUG = true;
 
     var elapsedTime: Float;
 
     var obj: Object;
-    var bmp: Bitmap;
+    var ship: Bitmap;
+    var fire: Bitmap;
+
     var speed: Float;
+    var mspeed: Float;
+    var dir = new Vector(0, 0, 0);
 
     public function new(parentObject: h2d.Object, x: Int, y: Int) {
         this.speed = 0;
@@ -30,7 +35,7 @@ class Player {
     }
 
     public function setPotision(x, y) {
-        this.bmp.setPosition(x, y);
+        this.ship.setPosition(x, y);
     }
 
     public function getPosition() {
@@ -46,7 +51,13 @@ class Player {
         if (left) this.obj.rotate(-Math.PI/32);
         else if (right) this.obj.rotate(Math.PI/32);
 
-        if (up) increaseSpeed();
+        if (up) {
+            drawFire();
+            increaseSpeed();
+        } else {
+            removeFire();
+            this.speed = 0;
+        }
     }
 
     function increaseSpeed() {
@@ -67,11 +78,38 @@ class Player {
 
         var tile = Tile.fromBitmap(bmpData);
         tile.setCenterRatio(0.5, 0.5);
-        this.bmp = new Bitmap(tile, parentObject);
+        this.ship = new Bitmap(tile, parentObject);
         parentObject.setPosition(x, y);
+
+        var bmpData2 = new BitmapData(8, 8);
+        bmpData2.line(0,3, 7,0, 0xFFFF0000);
+        bmpData2.line(0,4, 7,7, 0xFFFF0000);
+
+        var tile2 = Tile.fromBitmap(bmpData2);
+        this.fire = new Bitmap(tile2, this.obj);
+        this.fire.setPosition(-16, -4);
+        this.fire.alpha = 0;
+    }
+
+    function drawFire() {
+        this.fire.alpha = 1;
+    }
+
+    function removeFire() {
+        this.fire.alpha = 0;
     }
 
     function move() {
-        this.obj.move(speed, speed);
+        var xd = Math.cos(this.obj.rotation);
+        var yd = Math.sin(this.obj.rotation);
+        var vec = new Vector(xd * speed, yd * speed, 0);
+        this.dir = dir.add(vec);
+        this.obj.setPosition(this.obj.x + this.dir.x, this.obj.y + this.dir.y);
+
+        if (this.obj.x < -32) this.obj.x = 832;
+        if (this.obj.y < -32) this.obj.y = 632;
+        
+        if (this.obj.x > 832) this.obj.x = -32;
+        if (this.obj.y > 632) this.obj.y = -32;
     }
 }

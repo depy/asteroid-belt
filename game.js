@@ -181,6 +181,7 @@ Main.main = function() {
 };
 Math.__name__ = "Math";
 var Player = function(parentObject,x,y) {
+	this.dir = new h3d_Vector(0,0,0);
 	this.speed = 0;
 	this.obj = new h2d_Object(parentObject);
 	this.draw(this.obj,x,y);
@@ -212,7 +213,11 @@ Player.prototype = {
 			_g.rotation += Math.PI / 32;
 		}
 		if(up) {
+			this.drawFire();
 			this.increaseSpeed();
+		} else {
+			this.removeFire();
+			this.speed = 0;
 		}
 	}
 	,increaseSpeed: function() {
@@ -243,14 +248,75 @@ Player.prototype = {
 		}
 		tile.dx = -(px * tile.width);
 		tile.dy = -(py * tile.height);
-		this.bmp = new h2d_Bitmap(tile,parentObject);
+		this.ship = new h2d_Bitmap(tile,parentObject);
 		parentObject.posChanged = true;
 		parentObject.x = x;
 		parentObject.posChanged = true;
 		parentObject.y = y;
+		var bmpData2 = new hxd_BitmapData(8,8);
+		bmpData2.line(0,3,7,0,-65536);
+		bmpData2.line(0,4,7,7,-65536);
+		var tile2 = h2d_Tile.fromBitmap(bmpData2);
+		this.fire = new h2d_Bitmap(tile2,this.obj);
+		var _this = this.fire;
+		_this.posChanged = true;
+		_this.x = -16;
+		_this.posChanged = true;
+		_this.y = -4;
+		this.fire.alpha = 0;
+	}
+	,drawFire: function() {
+		this.fire.alpha = 1;
+	}
+	,removeFire: function() {
+		this.fire.alpha = 0;
 	}
 	,move: function() {
-		this.obj.move(this.speed,this.speed);
+		var xd = Math.cos(this.obj.rotation);
+		var yd = Math.sin(this.obj.rotation);
+		var x = xd * this.speed;
+		var y = yd * this.speed;
+		var z = 0;
+		if(z == null) {
+			z = 0.;
+		}
+		if(y == null) {
+			y = 0.;
+		}
+		if(x == null) {
+			x = 0.;
+		}
+		var vec_x = x;
+		var vec_y = y;
+		var vec_z = z;
+		var vec_w = 1.;
+		var _this = this.dir;
+		this.dir = new h3d_Vector(_this.x + vec_x,_this.y + vec_y,_this.z + vec_z,_this.w + vec_w);
+		var _this = this.obj;
+		_this.posChanged = true;
+		_this.x = this.obj.x + this.dir.x;
+		_this.posChanged = true;
+		_this.y = this.obj.y + this.dir.y;
+		if(this.obj.x < -32) {
+			var _this = this.obj;
+			_this.posChanged = true;
+			_this.x = 832;
+		}
+		if(this.obj.y < -32) {
+			var _this = this.obj;
+			_this.posChanged = true;
+			_this.y = 632;
+		}
+		if(this.obj.x > 832) {
+			var _this = this.obj;
+			_this.posChanged = true;
+			_this.x = -32;
+		}
+		if(this.obj.y > 632) {
+			var _this = this.obj;
+			_this.posChanged = true;
+			_this.y = -32;
+		}
 	}
 	,__class__: Player
 };
@@ -1355,16 +1421,6 @@ h2d_Object.prototype = {
 				c.drawRec(ctx);
 			}
 		}
-	}
-	,move: function(dx,dy) {
-		var _g = this;
-		var v = _g.x + dx * Math.cos(this.rotation);
-		_g.posChanged = true;
-		_g.x = v;
-		var _g = this;
-		var v = _g.y + dy * Math.sin(this.rotation);
-		_g.posChanged = true;
-		_g.y = v;
 	}
 	,contentChanged: function(s) {
 	}
@@ -28314,8 +28370,8 @@ Array.__name__ = "Array";
 haxe_ds_ObjectMap.count = 0;
 haxe_MainLoop.add(hxd_System.updateCursor,-1);
 js_Boot.__toStr = ({ }).toString;
-Player.MAX_SPEED = 4;
-Player.SPEED_INCREMENT = 0.1;
+Player.MAX_SPEED = 0.1;
+Player.SPEED_INCREMENT = 0.02;
 Player.SPEED_DECREMENT = 0.01;
 h3d_Buffer.GUID = 0;
 h3d_Engine.SOFTWARE_DRIVER = false;
