@@ -10,9 +10,9 @@ function $extend(from, fields) {
 var Bullet = function(parentObject,x,y,dir) {
 	this.timer = 0.0;
 	this.dead = false;
-	dir.x *= 3;
-	dir.y *= 3;
-	dir.z *= 3;
+	dir.x *= 6;
+	dir.y *= 6;
+	dir.z *= 6;
 	this.dir = dir;
 	this.parentObject = parentObject;
 	this.draw(x,y);
@@ -46,10 +46,10 @@ Bullet.prototype = {
 	}
 	,update: function(dt) {
 		this.timer += dt;
-		if(this.timer > 2) {
-			this.bmp.alpha -= 4 * dt;
+		if(this.timer > 1.5) {
+			this.bmp.alpha -= 8 * dt;
 		}
-		if(this.timer > 3) {
+		if(this.timer > 2) {
 			this.dead = true;
 			this.tile.dispose();
 			this.parentObject.removeChild(this.bmp);

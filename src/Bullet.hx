@@ -13,7 +13,7 @@ class Bullet {
     var timer = 0.0;
 
     public function new(parentObject: Object, x: Float, y: Float, dir: Vector) {
-        dir.scale(3);
+        dir.scale(6);
         this.dir = dir;
         this.parentObject = parentObject;
         draw(x, y);
@@ -34,8 +34,8 @@ class Bullet {
 
     public function update(dt: Float) {
         timer += dt;
-        if (timer > 2) this.bmp.alpha -= 4 * dt;
-        if (timer > 3) {
+        if (timer > 1.5) this.bmp.alpha -= 8 * dt;
+        if (timer > 2) {
             this.dead = true;
             this.tile.dispose();
             this.parentObject.removeChild(this.bmp);
