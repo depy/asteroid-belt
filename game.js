@@ -7,6 +7,108 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var Asteroid = function(parentObject,x,y) {
+	this.timer = 0.0;
+	this.dead = false;
+	this.rot = 0.005;
+	if(Math.random() > 0.5) {
+		this.rot = 0.025;
+	}
+	if(Math.random() > 0.5) {
+		this.rot *= -1;
+	}
+	this.dir = new h3d_Vector(Math.random(),Math.random(),0);
+	var _this = this.dir;
+	_this.x *= 1;
+	_this.y *= 1;
+	_this.z *= 1;
+	this.parentObject = parentObject;
+	this.draw(x,y);
+};
+Asteroid.__name__ = "Asteroid";
+Asteroid.prototype = {
+	draw: function(x,y) {
+		var bmpData = new hxd_BitmapData(64,64);
+		var center_x = 31;
+		var center_y = 31;
+		var angle = 0.0;
+		var r = 26;
+		var px = Math.cos(angle) * r;
+		var py = Math.sin(angle) * r;
+		var pv = new h3d_Vector(px,py,0);
+		var _g = 0;
+		while(_g < 8) {
+			var i = _g++;
+			angle += Math.PI / 4;
+			var x1 = Math.cos(angle) * r;
+			var y1 = Math.sin(angle) * r;
+			var v = new h3d_Vector(x1,y1,0);
+			bmpData.line((pv.x | 0) + 31,(pv.y | 0) + 31,(v.x | 0) + 31,(y1 | 0) + 31,-65281);
+			px = x1;
+			py = y1;
+			pv = v;
+		}
+		bmpData.line(0,0,63,0,-10066330);
+		bmpData.line(63,0,63,63,-10066330);
+		bmpData.line(63,63,0,63,-10066330);
+		bmpData.line(0,63,0,0,-10066330);
+		this.tile = h2d_Tile.fromBitmap(bmpData);
+		var _this = this.tile;
+		var px = 0.5;
+		var py = 0.5;
+		if(py == null) {
+			py = 0.5;
+		}
+		if(px == null) {
+			px = 0.5;
+		}
+		_this.dx = -(px * _this.width);
+		_this.dy = -(py * _this.height);
+		this.bmp = new h2d_Bitmap(this.tile,this.parentObject);
+		var _this = this.bmp;
+		_this.posChanged = true;
+		_this.x = x;
+		_this.posChanged = true;
+		_this.y = y;
+	}
+	,update: function(dt) {
+		this.timer += dt;
+		if(this.dead) {
+			this.tile.dispose();
+			this.parentObject.removeChild(this.bmp);
+		} else {
+			var _g = this.bmp;
+			_g.posChanged = true;
+			_g.rotation += this.rot;
+			var _this = this.bmp;
+			_this.posChanged = true;
+			_this.x = this.bmp.x + this.dir.x;
+			_this.posChanged = true;
+			_this.y = this.bmp.y + this.dir.y;
+			if(this.bmp.x < -64) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.x = 864;
+			}
+			if(this.bmp.y < -64) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.y = 664;
+			}
+			if(this.bmp.x > 864) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.x = -64;
+			}
+			if(this.bmp.y > 664) {
+				var _this = this.bmp;
+				_this.posChanged = true;
+				_this.y = -64;
+			}
+		}
+	}
+	,__class__: Asteroid
+};
 var Bullet = function(parentObject,x,y,dir) {
 	this.timer = 0.0;
 	this.dead = false;
@@ -188,6 +290,7 @@ hxd_App.prototype = {
 };
 var Game = function() {
 	this.timer = 0.0;
+	this.asteroids = [];
 	this.bullets = [];
 	hxd_App.call(this);
 };
@@ -212,12 +315,17 @@ Game.prototype = $extend(hxd_App.prototype,{
 		_g.posChanged = true;
 		_g.scaleY *= 2;
 		this.p = new Player(this.s2d,100,100);
+		this.asteroids.push(new Asteroid(this.s2d,Math.random() * Game.WIN_WIDTH,Math.random() * Game.WIN_HEIGHT));
+		this.asteroids.push(new Asteroid(this.s2d,Math.random() * Game.WIN_WIDTH,Math.random() * Game.WIN_HEIGHT));
+		this.asteroids.push(new Asteroid(this.s2d,Math.random() * Game.WIN_WIDTH,Math.random() * Game.WIN_HEIGHT));
+		this.asteroids.push(new Asteroid(this.s2d,Math.random() * Game.WIN_WIDTH,Math.random() * Game.WIN_HEIGHT));
+		this.asteroids.push(new Asteroid(this.s2d,Math.random() * Game.WIN_WIDTH,Math.random() * Game.WIN_HEIGHT));
 	}
 	,update: function(dt) {
 		this.timer += dt;
 		if(this.timer > 1) {
 			this.timer = 0;
-			haxe_Log.trace("Bullets: " + this.bullets.length + " :: Scene children " + this.s2d.children.length,{ fileName : "src/Game.hx", lineNumber : 34, className : "Game", methodName : "update"});
+			haxe_Log.trace("Bullets: " + this.bullets.length + " :: Scene children " + this.s2d.children.length,{ fileName : "src/Game.hx", lineNumber : 41, className : "Game", methodName : "update"});
 		}
 		this.p.update(dt);
 		var _g = 0;
@@ -229,6 +337,17 @@ Game.prototype = $extend(hxd_App.prototype,{
 				HxOverrides.remove(this.bullets,b);
 			} else {
 				b.update(dt);
+			}
+		}
+		var _g = 0;
+		var _g1 = this.asteroids;
+		while(_g < _g1.length) {
+			var a = _g1[_g];
+			++_g;
+			if(a.dead) {
+				HxOverrides.remove(this.asteroids,a);
+			} else {
+				a.update(dt);
 			}
 		}
 	}
@@ -28501,6 +28620,8 @@ Array.__name__ = "Array";
 haxe_ds_ObjectMap.count = 0;
 haxe_MainLoop.add(hxd_System.updateCursor,-1);
 js_Boot.__toStr = ({ }).toString;
+Game.WIN_WIDTH = 800;
+Game.WIN_HEIGHT = 600;
 Player.MAX_SPEED = 5;
 Player.ROTATION_SPEED = Math.PI / 32;
 h3d_Buffer.GUID = 0;
